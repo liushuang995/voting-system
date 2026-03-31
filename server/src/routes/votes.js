@@ -8,6 +8,7 @@ router.use(auth);
 router.get('/stats', voteController.stats);
 router.get('/', voteController.list);
 router.get('/:id', voteController.detail);
+router.get('/:id/export', voteController.exportRecords);
 router.post('/', voteController.create);
 router.put('/:id', voteController.update);
 router.delete('/:id', voteController.remove);

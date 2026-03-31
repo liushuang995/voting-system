@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, Row, Col, Progress, Table, Button, Space, Spin, message } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DownloadOutlined } from '@ant-design/icons';
 import api from '../../api';
 
 function VoteResults() {
@@ -102,6 +102,7 @@ function VoteResults() {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/votes')}>返回</Button>
+        <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/votes/${id}/export`)}>导出Excel</Button>
         <h2 style={{ margin: 0 }}>{vote.title}</h2>
       </Space>
 

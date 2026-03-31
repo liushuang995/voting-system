@@ -2,6 +2,7 @@ const Vote = require('../models/Vote');
 const { success, error, page } = require('../utils/response');
 const crypto = require('crypto');
 const QrcodeService = require('../services/qrcodeService');
+const ExportService = require('../services/exportService');
 
 exports.list = async (req, res) => {
   try {
@@ -78,5 +79,16 @@ exports.detail = async (req, res) => {
     success(res, vote);
   } catch (err) {
     error(res, '获取投票详情失败');
+  }
+};
+
+// 导出投票记录
+exports.exportRecords = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await ExportService.exportVoteRecords(id, res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ code: -1, message: err.message || '导出失败' });
   }
 };
