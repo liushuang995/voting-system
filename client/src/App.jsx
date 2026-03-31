@@ -6,6 +6,7 @@ import VoteCreate from './pages/admin/VoteCreate';
 import VoteResults from './pages/admin/VoteResults';
 import VoteEdit from './pages/admin/VoteEdit';
 import VotePage from './pages/vote/VotePage';
+import VoterLogin from './pages/vote/VoterLogin';
 import Whitelist from './pages/admin/Whitelist';
 import SuperAdmins from './pages/admin/SuperAdmins';
 import AdminLayout from './components/Layout';
@@ -44,6 +45,7 @@ function App() {
         <Route path="super-admins" element={<SuperAdmins />} />
       </Route>
       <Route path="/vote/:shareUrl" element={<VotePage />} />
+      <Route path="/vote/login" element={<VoterLogin />} />
       <Route path="/" element={<Navigate to="/admin" replace />} />
     </Routes>
   );

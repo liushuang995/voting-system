@@ -185,6 +185,37 @@ exports.getPublicVote = async (req, res) => {
   }
 };
 
+// 白名单用户投票登录
+exports.voterLogin = async (req, res) => {
+  try {
+    const { unionid, password } = req.body;
+    if (!unionid || !password) {
+      return error(res, '请输入账号和密码');
+    }
+
+    const user = await AdminWhitelist.findByUnionid(unionid);
+    if (!user || user.status !== 'active') {
+      return error(res, '用户未授权');
+    }
+
+    if (user.password !== password) {
+      return error(res, '密码错误');
+    }
+
+    const token = generateToken({
+      id: user.id,
+      unionid: user.unionid,
+      nickname: user.nickname || user.unionid,
+      type: 'voter'
+    });
+
+    success(res, { token, nickname: user.nickname || user.unionid });
+  } catch (err) {
+    console.error(err);
+    error(res, '登录失败');
+  }
+};
+
 // 获取投票记录
 exports.getVoteRecords = async (req, res) => {
   try {

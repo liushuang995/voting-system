@@ -90,13 +90,13 @@ function Whitelist() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2>管理员白名单</h2>
-        <Button type="primary" onClick={() => setModalVisible(true)}>添加管理员</Button>
+        <h2>白名单用户</h2>
+        <Button type="primary" onClick={() => setModalVisible(true)}>添加用户</Button>
       </div>
       <Table columns={columns} dataSource={list} rowKey="id" loading={loading} />
 
       <Modal
-        title="添加管理员"
+        title="添加用户"
         open={modalVisible}
         onOk={handleAdd}
         onCancel={() => {
@@ -109,13 +109,20 @@ function Whitelist() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="unionid"
-            label="UnionID"
-            rules={[{ required: true, message: '请输入微信 UnionID' }]}
+            label="账号"
+            rules={[{ required: true, message: '请输入账号' }]}
           >
-            <Input placeholder="请输入微信 UnionID" />
+            <Input placeholder="请输入账号" />
           </Form.Item>
           <Form.Item name="nickname" label="昵称">
-            <Input placeholder="管理员昵称（选填）" />
+            <Input placeholder="昵称（选填）" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label="密码"
+            rules={[{ required: true, message: '请输入投票登录密码' }]}
+          >
+            <Input.Password placeholder="设置投票登录密码" />
           </Form.Item>
         </Form>
       </Modal>

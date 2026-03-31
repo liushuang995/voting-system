@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, Button, Radio, Checkbox, Space, message, Result, Spin } from 'antd';
-import { useParams } from 'react-router-dom';
+import { Card, Button, Radio, Checkbox, Space, message, Result, Spin, Form, Input } from 'antd';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 
 // 检测是否在微信环境
@@ -10,18 +10,16 @@ const isWeChat = () => {
 
 function VotePage() {
   const { shareUrl } = useParams();
+  const navigate = useNavigate();
   const [vote, setVote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selected, setSelected] = useState([]);
   const [voted, setVoted] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
-    // 非微信环境显示提示
-    if (!isWeChat()) {
-      setLoading(false);
-      return;
-    }
+    // 非微信环境先加载投票
     loadVote();
   }, [shareUrl]);
 
@@ -31,24 +29,32 @@ function VotePage() {
       const res = await api.get(`/wechat/votes/public/${shareUrl}`);
       if (res?.code === 0) {
         setVote(res.data);
-      } else if (res?.code === 401) {
-        // 未登录，触发微信授权
-        const redirectUri = encodeURIComponent(window.location.href);
-        window.location.href = `/api/wechat/auth?redirect_uri=${redirectUri}`;
-        return;
       } else {
         message.error(res?.message || '加载失败');
       }
     } catch (err) {
-      if (err.response?.status === 401) {
-        // 触发微信授权
-        const redirectUri = encodeURIComponent(window.location.href);
-        window.location.href = `/api/wechat/auth?redirect_uri=${redirectUri}`;
-        return;
-      }
       message.error('加载失败');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVoterLogin = async (values) => {
+    setLoginLoading(true);
+    try {
+      const res = await api.post('/wechat/voter/login', values);
+      if (res?.code === 0) {
+        localStorage.setItem('voter_token', res.data.token);
+        localStorage.setItem('voter_nickname', res.data.nickname);
+        message.success('登录成功');
+        loadVote();
+      } else {
+        message.error(res?.message || '登录失败');
+      }
+    } catch (err) {
+      message.error('登录失败');
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -59,10 +65,13 @@ function VotePage() {
 
     setSubmitting(true);
     try {
+      const token = localStorage.getItem('voter_token');
       const res = await api.post('/wechat/vote', {
         share_url: shareUrl,
         options: selected
-      });
+      }, token ? {
+        headers: { Authorization: `Bearer ${token}` }
+      } : {});
       if (res?.code === 0) {
         setVoted(true);
       } else {
@@ -83,14 +92,35 @@ function VotePage() {
     );
   }
 
-  // 非微信环境提示
+  // 非微信环境显示登录表单
   if (!isWeChat()) {
     return (
-      <Result
-        status="warning"
-        title="请在微信中打开"
-        subTitle="此投票链接需要在微信环境中打开，请使用微信扫描二维码或分享给微信好友"
-      />
+      <div style={{ maxWidth: 400, margin: '50px auto', padding: '0 16px' }}>
+        <Card title="请先登录">
+          <p style={{ marginBottom: 16, color: '#666' }}>使用白名单账号登录后可参与投票</p>
+          <Form onFinish={handleVoterLogin} layout="vertical">
+            <Form.Item
+              name="unionid"
+              label="账号"
+              rules={[{ required: true, message: '请输入账号' }]}
+            >
+              <Input placeholder="请输入账号" />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label="密码"
+              rules={[{ required: true, message: '请输入密码' }]}
+            >
+              <Input.Password placeholder="请输入密码" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loginLoading} block>
+                登录
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
     );
   }
 

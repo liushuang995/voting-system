@@ -8,6 +8,7 @@ router.get('/config', wechatController.getJssdkConfig);
 
 // 公开路由
 router.get('/votes/public/:shareUrl', wechatController.getPublicVote);
+router.post('/voter/login', wechatController.voterLogin);
 
 // 需要认证的路由
 router.post('/vote', auth, wechatController.submitVote);

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS admin_whitelist (
   id INT PRIMARY KEY AUTO_INCREMENT,
   unionid VARCHAR(100) NOT NULL UNIQUE,
   nickname VARCHAR(100),
+  password VARCHAR(100),
   status ENUM('active', 'disabled') DEFAULT 'active',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   created_by INT
