@@ -1,3 +1,5 @@
+const https = require('https');
+const crypto = require('crypto');
 const WechatService = require('../services/wechatService');
 const AdminWhitelist = require('../models/AdminWhitelist');
 const { success, error } = require('../utils/response');
@@ -75,7 +77,6 @@ exports.getJssdkConfig = async (req, res) => {
     const timestamp = Math.floor(Date.now() / 1000);
     const nonceStr = Math.random().toString(36).substring(2);
     const str = `jsapi_ticket=${jsapiTicket}&noncestr=${nonceStr}&timestamp=${timestamp}&url=${url}`;
-    const crypto = require('crypto');
     const signature = crypto.createHash('sha1').update(str).digest('hex');
 
     success(res, {
