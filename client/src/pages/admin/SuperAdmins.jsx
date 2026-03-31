@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
 import api from '../../api';
 
@@ -8,11 +8,7 @@ function SuperAdmins() {
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
       const res = await api.get('/admin/super-admins');
@@ -26,6 +22,10 @@ function SuperAdmins() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   const handleAdd = async () => {
