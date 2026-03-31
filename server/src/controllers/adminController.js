@@ -53,13 +53,14 @@ exports.getWhitelist = async (req, res) => {
 // 添加白名单
 exports.addWhitelist = async (req, res) => {
   try {
-    const { unionid, nickname } = req.body;
-    if (!unionid) {
-      return error(res, 'unionid不能为空');
+    const { unionid, nickname, password } = req.body;
+    if (!unionid || !password) {
+      return error(res, '账号和密码不能为空');
     }
     await AdminWhitelist.create({
       unionid,
       nickname,
+      password,
       created_by: req.user.id
     });
     success(res);
