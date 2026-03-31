@@ -10,11 +10,30 @@ import Whitelist from './pages/admin/Whitelist';
 import SuperAdmins from './pages/admin/SuperAdmins';
 import AdminLayout from './components/Layout';
 
+// 管理员路由保护组件
+function RequireAdmin({ children }) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  try {
+    JSON.parse(atob(token.split('.')[1]));
+    return children;
+  } catch (e) {
+    localStorage.removeItem('token');
+    return <Navigate to="/admin/login" replace />;
+  }
+}
+
 function App() {
   return (
     <Routes>
       <Route path="/admin/login" element={<Login />} />
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin" element={
+        <RequireAdmin>
+          <AdminLayout />
+        </RequireAdmin>
+      }>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="votes" element={<VoteList />} />

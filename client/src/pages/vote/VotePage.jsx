@@ -3,6 +3,11 @@ import { Card, Button, Radio, Checkbox, Space, message, Result, Spin } from 'ant
 import { useParams } from 'react-router-dom';
 import api from '../../api';
 
+// 检测是否在微信环境
+const isWeChat = () => {
+  return /MicroMessenger/i.test(navigator.userAgent);
+};
+
 function VotePage() {
   const { shareUrl } = useParams();
   const [vote, setVote] = useState(null);
@@ -12,6 +17,11 @@ function VotePage() {
   const [voted, setVoted] = useState(false);
 
   useEffect(() => {
+    // 非微信环境显示提示
+    if (!isWeChat()) {
+      setLoading(false);
+      return;
+    }
     loadVote();
   }, [shareUrl]);
 
@@ -21,10 +31,21 @@ function VotePage() {
       const res = await api.get(`/wechat/votes/public/${shareUrl}`);
       if (res?.code === 0) {
         setVote(res.data);
+      } else if (res?.code === 401) {
+        // 未登录，触发微信授权
+        const redirectUri = encodeURIComponent(window.location.href);
+        window.location.href = `/api/wechat/auth?redirect_uri=${redirectUri}`;
+        return;
       } else {
         message.error(res?.message || '加载失败');
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        // 触发微信授权
+        const redirectUri = encodeURIComponent(window.location.href);
+        window.location.href = `/api/wechat/auth?redirect_uri=${redirectUri}`;
+        return;
+      }
       message.error('加载失败');
     } finally {
       setLoading(false);
@@ -59,6 +80,17 @@ function VotePage() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <Spin size="large" />
       </div>
+    );
+  }
+
+  // 非微信环境提示
+  if (!isWeChat()) {
+    return (
+      <Result
+        status="warning"
+        title="请在微信中打开"
+        subTitle="此投票链接需要在微信环境中打开，请使用微信扫描二维码或分享给微信好友"
+      />
     );
   }
 

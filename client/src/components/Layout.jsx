@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Layout, Menu, Avatar, Dropdown } from 'antd';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import {
@@ -15,24 +14,13 @@ const { Header, Sider, Content } = Layout;
 function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUsername(payload.username);
-      } catch (e) {}
-    }
-  }, []);
 
   const handleLogout = async () => {
     try {
       await api.post('/admin/logout');
     } finally {
       localStorage.removeItem('token');
-      navigate('/admin/login'); // 使用 navigate 而不是 window.location.href
+      navigate('/admin/login');
     }
   };
 
