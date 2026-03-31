@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout, Menu, Avatar, Dropdown } from 'antd';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined,
   BarChartOutlined,
@@ -14,6 +14,7 @@ const { Header, Sider, Content } = Layout;
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState('');
 
   useEffect(() => {
