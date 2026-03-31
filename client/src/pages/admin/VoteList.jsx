@@ -82,8 +82,18 @@ function VoteList() {
         <Space>
           <Button size="small" icon={<ShareAltOutlined />} onClick={() => {
             const shareUrl = `${window.location.origin}/vote/${record.share_url}`;
-            navigator.clipboard.writeText(shareUrl);
-            message.success('分享链接已复制');
+            if (navigator.clipboard?.writeText) {
+              navigator.clipboard.writeText(shareUrl);
+              message.success('分享链接已复制');
+            } else {
+              const input = document.createElement('input');
+              input.value = shareUrl;
+              document.body.appendChild(input);
+              input.select();
+              document.execCommand('copy');
+              document.body.removeChild(input);
+              message.success('分享链接已复制');
+            }
           }} />
           <Button size="small" icon={<BarChartOutlined />} onClick={() => navigate(`/admin/votes/${record.id}/results`)} />
           <Button size="small" icon={<EditOutlined />} onClick={() => navigate(`/admin/votes/${record.id}/edit`)} />
