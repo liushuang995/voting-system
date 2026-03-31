@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Space, Input, Select, Popconfirm, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { PlusOutlined, EditOutlined, DeleteOutlined, BarChartOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, BarChartOutlined, ShareAltOutlined } from '@ant-design/icons';
 import api from '../../api';
 
 const { Option } = Select;
@@ -80,6 +80,11 @@ function VoteList() {
       title: '操作',
       render: (_, record) => (
         <Space>
+          <Button size="small" icon={<ShareAltOutlined />} onClick={() => {
+            const shareUrl = `${window.location.origin}/vote/${record.share_url}`;
+            navigator.clipboard.writeText(shareUrl);
+            message.success('分享链接已复制');
+          }} />
           <Button size="small" icon={<BarChartOutlined />} onClick={() => navigate(`/admin/votes/${record.id}/results`)} />
           <Button size="small" icon={<EditOutlined />} onClick={() => navigate(`/admin/votes/${record.id}/edit`)} />
           <Popconfirm title="确认删除？" onConfirm={() => handleDelete(record.id)}>

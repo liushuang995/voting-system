@@ -24,7 +24,15 @@ function VoteEdit() {
       const res = await api.get(`/votes/${id}`);
       if (res?.code === 0) {
         setVote(res.data);
-        const opts = JSON.parse(res.data.options || '[]');
+        const rawOpts = res.data.options;
+        let opts;
+        if (Array.isArray(rawOpts)) {
+          opts = rawOpts;
+        } else if (typeof rawOpts === 'string') {
+          opts = JSON.parse(rawOpts || '[]');
+        } else {
+          opts = ['', ''];
+        }
         setOptions(opts.length > 0 ? opts : ['', '']);
         form.setFieldsValue({
           title: res.data.title,
@@ -39,6 +47,7 @@ function VoteEdit() {
         message.error(res?.message || '加载失败');
       }
     } catch (err) {
+      console.error(err);
       message.error('加载失败');
     } finally {
       setInitLoading(false);
