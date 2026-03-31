@@ -16,6 +16,9 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+const adminRoutes = require('./routes/admin');
+app.use('/api/admin', adminRoutes);
+
 // 错误处理
 app.use((err, req, res, next) => {
   console.error(err.stack);
