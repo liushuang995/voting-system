@@ -95,7 +95,12 @@ function VotePage() {
     );
   }
 
-  const options = JSON.parse(vote.options || '[]');
+  let options = [];
+  try {
+    options = JSON.parse(vote.options || '[]');
+  } catch (e) {
+    options = [];
+  }
 
   return (
     <div style={{ maxWidth: 600, margin: '50px auto', padding: '0 16px' }}>
@@ -109,7 +114,9 @@ function VotePage() {
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          {vote.type === 'single' ? (
+          {options.length === 0 ? (
+            <p style={{ color: '#999' }}>暂无可投票项</p>
+          ) : vote.type === 'single' ? (
             <Radio.Group value={selected[0]} onChange={(e) => setSelected([e.target.value])}>
               <Space direction="vertical">
                 {options.map((opt, idx) => (
