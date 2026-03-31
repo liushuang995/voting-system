@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
 import api from '../../api';
 
@@ -10,9 +10,9 @@ function SuperAdmins() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/admin/super-admins');
@@ -21,10 +21,12 @@ function SuperAdmins() {
       } else {
         message.error(res?.message || '获取失败');
       }
+    } catch (err) {
+      message.error('获取失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleAdd = async () => {
     try {
@@ -39,7 +41,7 @@ function SuperAdmins() {
         message.error(res?.message || '创建失败');
       }
     } catch (err) {
-      // 用户取消验证
+      // 表单验证失败，不需要提示
     }
   };
 
