@@ -32,7 +32,7 @@ function AdminLayout() {
       await api.post('/admin/logout');
     } finally {
       localStorage.removeItem('token');
-      window.location.href = '/admin/login';
+      navigate('/admin/login'); // 使用 navigate 而不是 window.location.href
     }
   };
 
