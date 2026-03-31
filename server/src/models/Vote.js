@@ -46,14 +46,18 @@ class Vote {
   }
 
   static async update(id, data) {
+    const allowedFields = ['title', 'description', 'type', 'options', 'max_votes_per_user', 'end_time', 'share_title', 'share_desc', 'share_img', 'share_url', 'qrcode', 'status'];
     const fields = [];
     const params = [];
+
     for (const [key, value] of Object.entries(data)) {
-      if (value !== undefined) {
+      if (allowedFields.includes(key)) {
         fields.push(`${key} = ?`);
         params.push(key === 'options' ? JSON.stringify(value) : value);
       }
     }
+
+    if (fields.length === 0) return;
     params.push(id);
     await pool.query(`UPDATE votes SET ${fields.join(', ')} WHERE id = ?`, params);
   }
