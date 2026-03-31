@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../api';
 
 function VoterLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const shareUrl = location.state?.shareUrl;
+  const [searchParams] = useSearchParams();
+  const shareUrl = searchParams.get('shareUrl');
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -18,9 +18,9 @@ function VoterLogin() {
         localStorage.setItem('voter_nickname', res.data.nickname);
         message.success('登录成功');
         if (shareUrl) {
-          navigate(`/vote/${shareUrl}`);
+          navigate(`/vote/${shareUrl}`, { replace: true });
         } else {
-          navigate('/');
+          navigate('/', { replace: true });
         }
       } else {
         message.error(res?.message || '登录失败');
@@ -35,6 +35,9 @@ function VoterLogin() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
       <Card title="用户登录" style={{ width: 360 }}>
+        {shareUrl && (
+          <p style={{ marginBottom: 16, color: '#666' }}>即将跳转至投票页面</p>
+        )}
         <Form onFinish={onFinish} layout="vertical">
           <Form.Item
             name="unionid"
