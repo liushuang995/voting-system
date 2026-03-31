@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
+import VoteList from './pages/admin/VoteList';
 import AdminLayout from './components/Layout';
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="votes" element={<VoteList />} />
       </Route>
       <Route path="/" element={<Navigate to="/admin" replace />} />
     </Routes>

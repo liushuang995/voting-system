@@ -19,6 +19,9 @@ app.get('/api/health', (req, res) => {
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const voteRoutes = require('./routes/votes');
+app.use('/api/votes', voteRoutes);
+
 // 错误处理
 app.use((err, req, res, next) => {
   console.error(err.stack);
