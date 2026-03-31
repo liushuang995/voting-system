@@ -12,8 +12,7 @@ NC='\033[0m'
 echo_step() { echo -e "${GREEN}==>${NC} $1"; }
 
 PROJECT_DIR="$HOME/voting-system"
-DB_NAME="toupiao_db"
-DB_PASS="123456"
+SERVER_IP=$(hostname -I | awk '{print $1}')
 
 deploy() {
     echo "========================================="
@@ -40,18 +39,53 @@ deploy() {
     echo_step "4. 构建前端..."
     npm run build
 
-    # 5. 重启后端服务
-    echo_step "5. 重启后端服务..."
+    # 5. 配置 Nginx
+    echo_step "5. 配置 Nginx..."
+    sudo tee /etc/nginx/conf.d/voting.conf > /dev/null <<EOF
+server {
+    listen 80;
+    server_name ${SERVER_IP};
+
+    client_max_body_size 100M;
+
+    location / {
+        root ${PROJECT_DIR}/client/dist;
+        index index.html;
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /api {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+EOF
+
+    # 6. 重载 Nginx
+    echo_step "6. 重载 Nginx..."
+    sudo nginx -t && sudo nginx -s reload
+
+    # 7. 重启后端服务
+    echo_step "7. 重启后端服务..."
     cd "$PROJECT_DIR/server"
     pm2 restart voting-server || pm2 start src/app.js --name voting-server
+    pm2 save
 
     echo ""
     echo "========================================="
     echo -e "${GREEN}部署完成！${NC}"
     echo "========================================="
     echo ""
-    echo "访问地址: http://你的域名或IP"
-    echo "查看日志: pm2 logs voting-server"
+    echo "访问地址: http://${SERVER_IP}"
+    echo "超管账号: admin"
+    echo "超管密码: 123456"
+    echo ""
+    echo "常用命令:"
+    echo "  查看后端日志: pm2 logs voting-server"
+    echo "  重启后端:     pm2 restart voting-server"
+    echo "  重启 Nginx:   sudo nginx -s reload"
     echo ""
 }
 
