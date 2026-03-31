@@ -17,6 +17,7 @@ function VotePage() {
   const [selected, setSelected] = useState([]);
   const [voted, setVoted] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('voter_token'));
 
   useEffect(() => {
     // 非微信环境先加载投票
@@ -47,6 +48,7 @@ function VotePage() {
         localStorage.setItem('voter_token', res.data.token);
         localStorage.setItem('voter_nickname', res.data.nickname);
         message.success('登录成功');
+        setIsLoggedIn(true);
         loadVote();
       } else {
         message.error(res?.message || '登录失败');
@@ -92,8 +94,8 @@ function VotePage() {
     );
   }
 
-  // 非微信环境显示登录表单
-  if (!isWeChat()) {
+  // 非微信环境且未登录，显示登录表单
+  if (!isWeChat() && !isLoggedIn) {
     return (
       <div style={{ maxWidth: 400, margin: '50px auto', padding: '0 16px' }}>
         <Card title="请先登录">
