@@ -29,7 +29,22 @@ function Whitelist() {
   const handleAdd = async () => {
     try {
       await form.validateFields();
-      const res = await api.post('/admin/whitelist', form.getFieldsValue());
+      const values = form.getFieldsValue();
+
+      // Get current user id from JWT token
+      const token = localStorage.getItem('token');
+      let createdBy = null;
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          createdBy = payload.id;
+        } catch (e) {}
+      }
+
+      const res = await api.post('/admin/whitelist', {
+        ...values,
+        created_by: createdBy
+      });
       if (res?.code === 0) {
         message.success('添加成功');
         setModalVisible(false);
