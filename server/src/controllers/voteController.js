@@ -1,6 +1,7 @@
 const Vote = require('../models/Vote');
 const { success, error, page } = require('../utils/response');
 const crypto = require('crypto');
+const QrcodeService = require('../services/qrcodeService');
 
 exports.list = async (req, res) => {
   try {
@@ -37,7 +38,11 @@ exports.create = async (req, res) => {
       end_time, share_title, share_desc, share_img, share_url
     });
 
-    success(res, { id, share_url });
+    // 生成二维码
+    const qrcode = await QrcodeService.generate(id, share_url);
+    await Vote.update(id, { qrcode });
+
+    success(res, { id, share_url, qrcode });
   } catch (err) {
     console.error(err);
     error(res, '创建投票失败');
