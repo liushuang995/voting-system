@@ -1,3 +1,8 @@
+/**
+ * 创建超管账号
+ * 用法: node scripts/createSuperAdmin.js [username] [password]
+ * 示例: node scripts/createSuperAdmin.js admin mypassword123
+ */
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
@@ -25,6 +30,7 @@ async function createSuperAdmin() {
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       console.error('超管账号已存在');
+      process.exit(1);
     } else {
       throw err;
     }
