@@ -14,10 +14,10 @@ class AdminWhitelist {
     return rows[0];
   }
 
-  static async create({ unionid, nickname, created_by }) {
+  static async create({ unionid, nickname, password, created_by }) {
     const [result] = await pool.query(
-      'INSERT INTO admin_whitelist (unionid, nickname, created_by) VALUES (?, ?, ?)',
-      [unionid, nickname, created_by]
+      'INSERT INTO admin_whitelist (unionid, nickname, password, created_by) VALUES (?, ?, ?, ?)',
+      [unionid, nickname, password, created_by]
     );
     return result.insertId;
   }
