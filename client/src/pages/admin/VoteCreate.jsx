@@ -5,8 +5,6 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from '../../api';
 import moment from 'moment';
 
-const { RangePicker } = DatePicker;
-
 function VoteCreate() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -44,7 +42,7 @@ function VoteCreate() {
         options: filteredOptions,
         end_time: values.end_time?.endOf('day').toISOString()
       });
-      if (res.code === 0) {
+      if (res?.code === 0) {
         message.success('创建成功');
         navigate('/admin/votes');
       } else {
