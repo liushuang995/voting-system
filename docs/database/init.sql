@@ -38,10 +38,12 @@ CREATE TABLE IF NOT EXISTS votes (
   share_img VARCHAR(255),
   share_url VARCHAR(255) NOT NULL UNIQUE,
   qrcode VARCHAR(255),
+  creator_unionid VARCHAR(100),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_share_url (share_url),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_creator (creator_unionid)
 );
 
 -- 投票记录表

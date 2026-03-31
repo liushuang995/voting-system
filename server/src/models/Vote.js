@@ -1,9 +1,15 @@
 const pool = require('../config/database');
 
 class Vote {
-  static async findAll({ status, search, page = 1, pageSize = 10 }) {
+  static async findAll({ status, search, page = 1, pageSize = 10, creatorUnionid, isAdmin }) {
     let where = '1=1';
     const params = [];
+
+    // 非管理员只能看自己创建的投票
+    if (!isAdmin && creatorUnionid) {
+      where += ' AND creator_unionid = ?';
+      params.push(creatorUnionid);
+    }
 
     if (status && status !== 'all') {
       where += ' AND status = ?';
@@ -36,11 +42,11 @@ class Vote {
   }
 
   static async create(data) {
-    const { title, description, type, options, max_votes_per_user, end_time, share_title, share_desc, share_img, share_url } = data;
+    const { title, description, type, options, max_votes_per_user, end_time, share_title, share_desc, share_img, share_url, creator_unionid } = data;
     const [result] = await pool.query(
-      `INSERT INTO votes (title, description, type, options, max_votes_per_user, end_time, share_title, share_desc, share_img, share_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [title, description, type, JSON.stringify(options), max_votes_per_user, end_time, share_title, share_desc, share_img, share_url]
+      `INSERT INTO votes (title, description, type, options, max_votes_per_user, end_time, share_title, share_desc, share_img, share_url, creator_unionid)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [title, description, type, JSON.stringify(options), max_votes_per_user, end_time, share_title, share_desc, share_img, share_url, creator_unionid]
     );
     return result.insertId;
   }

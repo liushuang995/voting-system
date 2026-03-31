@@ -7,7 +7,16 @@ const ExportService = require('../services/exportService');
 exports.list = async (req, res) => {
   try {
     const { status, search, page: pageNum, pageSize } = req.query;
-    const result = await Vote.findAll({ status, search, page: pageNum, pageSize });
+    // super_admin 可以看到所有投票，其他用户只看自己创建的
+    const isAdmin = req.user?.type === 'super_admin';
+    const result = await Vote.findAll({
+      status,
+      search,
+      page: pageNum,
+      pageSize,
+      isAdmin,
+      creatorUnionid: req.user?.unionid
+    });
     page(res, { ...result, page: parseInt(pageNum) || 1, pageSize: parseInt(pageSize) || 10 });
   } catch (err) {
     console.error(err);
@@ -33,10 +42,11 @@ exports.create = async (req, res) => {
     }
 
     const share_url = crypto.randomBytes(8).toString('hex');
+    const creator_unionid = req.user?.unionid || null;
 
     const id = await Vote.create({
       title, description, type, options, max_votes_per_user,
-      end_time, share_title, share_desc, share_img, share_url
+      end_time, share_title, share_desc, share_img, share_url, creator_unionid
     });
 
     // 生成二维码
