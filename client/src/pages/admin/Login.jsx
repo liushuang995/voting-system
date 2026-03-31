@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import api from '../../api';
 
 function Login() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
@@ -13,7 +15,7 @@ function Login() {
       if (res.code === 0) {
         localStorage.setItem('token', res.data.token);
         message.success('登录成功');
-        window.location.href = '/admin';
+        navigate('/admin');
       } else {
         message.error(res.message);
       }
