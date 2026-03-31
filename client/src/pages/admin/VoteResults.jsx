@@ -22,7 +22,12 @@ function VoteResults() {
       const voteRes = await api.get(`/votes/${id}`);
       if (voteRes.code === 0) {
         setVote(voteRes.data);
-        const options = JSON.parse(voteRes.data.options || '[]');
+        let options = [];
+        try {
+          options = JSON.parse(voteRes.data.options || '[]');
+        } catch (e) {
+          options = [];
+        }
         const initialResults = {};
         options.forEach((opt, idx) => {
           initialResults[idx] = { label: opt, count: 0, percentage: 0 };
