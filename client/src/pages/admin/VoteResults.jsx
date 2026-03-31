@@ -23,10 +23,14 @@ function VoteResults() {
       if (voteRes.code === 0) {
         setVote(voteRes.data);
         let options = [];
-        try {
-          options = JSON.parse(voteRes.data.options || '[]');
-        } catch (e) {
-          options = [];
+        if (Array.isArray(voteRes.data.options)) {
+          options = voteRes.data.options;
+        } else if (typeof voteRes.data.options === 'string') {
+          try {
+            options = JSON.parse(voteRes.data.options || '[]');
+          } catch (e) {
+            options = [];
+          }
         }
         const initialResults = {};
         options.forEach((opt, idx) => {
@@ -38,16 +42,20 @@ function VoteResults() {
           setRecords(recordsRes.data.list || []);
           const newResults = { ...initialResults };
           (recordsRes.data.list || []).forEach(record => {
-            try {
-              const selectedOptions = JSON.parse(record.options || '[]');
-              selectedOptions.forEach(optIdx => {
-                if (newResults[optIdx]) {
-                  newResults[optIdx].count++;
-                }
-              });
-            } catch (e) {
-              // ignore invalid options
+            let selectedOptions = [];
+            if (Array.isArray(record.options)) {
+              selectedOptions = record.options;
+            } else if (typeof record.options === 'string') {
+              try {
+                selectedOptions = JSON.parse(record.options || '[]');
+              } catch (e) {}
             }
+            selectedOptions.forEach(optIdx => {
+              const key = parseInt(optIdx);
+              if (newResults[key] !== undefined) {
+                newResults[key].count++;
+              }
+            });
           });
           const total = recordsRes.data.list?.length || 0;
           Object.keys(newResults).forEach(idx => {
@@ -71,25 +79,33 @@ function VoteResults() {
 
   const columns = useMemo(() => [
     {
-      title: '微信昵称',
+      title: '用户名称',
       dataIndex: 'nickname',
+      width: 150,
       render: (nickname) => nickname || '未知'
     },
     {
       title: '投票时间',
       dataIndex: 'created_at',
+      width: 180,
       render: (t) => t ? new Date(t).toLocaleString() : '未知'
     },
     {
       title: '选择选项',
       dataIndex: 'options',
+      width: 300,
       render: (opts) => {
-        try {
-          const parsed = JSON.parse(opts);
-          return parsed.map(idx => results[idx]?.label || `选项${idx + 1}`).join(', ');
-        } catch {
-          return '未知';
+        let parsed = [];
+        if (Array.isArray(opts)) {
+          parsed = opts;
+        } else if (typeof opts === 'string') {
+          try {
+            parsed = JSON.parse(opts);
+          } catch {
+            return '未知';
+          }
         }
+        return parsed.map(idx => results[parseInt(idx)]?.label || `选项${parseInt(idx) + 1}`).join(', ');
       }
     }
   ], [results]);
