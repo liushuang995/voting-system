@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, Row, Col, Progress, Table, Button, Space, Spin, message } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -27,27 +27,34 @@ function VoteResults() {
         options.forEach((opt, idx) => {
           initialResults[idx] = { label: opt, count: 0, percentage: 0 };
         });
-        setResults(initialResults);
-      }
 
-      const recordsRes = await api.get(`/votes/${id}/records`);
-      if (recordsRes.code === 0) {
-        setRecords(recordsRes.data.list || []);
-        // 统计各选项票数
-        const newResults = { ...initialResults };
-        (recordsRes.data.list || []).forEach(record => {
-          const selectedOptions = JSON.parse(record.options || '[]');
-          selectedOptions.forEach(optIdx => {
-            if (newResults[optIdx]) {
-              newResults[optIdx].count++;
+        const recordsRes = await api.get(`/votes/${id}/records`);
+        if (recordsRes.code === 0) {
+          setRecords(recordsRes.data.list || []);
+          const newResults = { ...initialResults };
+          (recordsRes.data.list || []).forEach(record => {
+            try {
+              const selectedOptions = JSON.parse(record.options || '[]');
+              selectedOptions.forEach(optIdx => {
+                if (newResults[optIdx]) {
+                  newResults[optIdx].count++;
+                }
+              });
+            } catch (e) {
+              // ignore invalid options
             }
           });
-        });
-        const total = recordsRes.data.list?.length || 0;
-        Object.keys(newResults).forEach(idx => {
-          newResults[idx].percentage = total > 0 ? Math.round((newResults[idx].count / total) * 100) : 0;
-        });
-        setResults(newResults);
+          const total = recordsRes.data.list?.length || 0;
+          Object.keys(newResults).forEach(idx => {
+            newResults[idx].percentage = total > 0 ? Math.round((newResults[idx].count / total) * 100) : 0;
+          });
+          setResults(newResults);
+        } else {
+          setResults(initialResults);
+          message.error(recordsRes.message || '获取投票记录失败');
+        }
+      } else {
+        message.error(voteRes.message || '获取投票详情失败');
       }
     } catch (err) {
       console.error(err);
@@ -57,22 +64,33 @@ function VoteResults() {
     }
   };
 
-  const columns = [
-    { title: '微信昵称', dataIndex: 'nickname' },
-    { title: '投票时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
-    { title: '选择选项', dataIndex: 'options', render: (opts) => {
-      try {
-        const parsed = JSON.parse(opts);
-        return parsed.map(idx => results[idx]?.label || `选项${idx + 1}`).join(', ');
-      } catch {
-        return '未知';
+  const columns = useMemo(() => [
+    {
+      title: '微信昵称',
+      dataIndex: 'nickname',
+      render: (nickname) => nickname || '未知'
+    },
+    {
+      title: '投票时间',
+      dataIndex: 'created_at',
+      render: (t) => t ? new Date(t).toLocaleString() : '未知'
+    },
+    {
+      title: '选择选项',
+      dataIndex: 'options',
+      render: (opts) => {
+        try {
+          const parsed = JSON.parse(opts);
+          return parsed.map(idx => results[idx]?.label || `选项${idx + 1}`).join(', ');
+        } catch {
+          return '未知';
+        }
       }
-    }}
-  ];
+    }
+  ], [results]);
 
   if (!vote) return <Spin spinning={loading}><div style={{ minHeight: 200 }} /></Spin>;
 
-  const options = JSON.parse(vote.options || '[]');
   const total = records.length;
 
   return (
