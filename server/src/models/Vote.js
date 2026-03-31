@@ -76,6 +76,18 @@ class Vote {
       activeVotes: active[0].total
     };
   }
+
+  static async getRecords(voteId, { page = 1, pageSize = 10 }) {
+    const countSql = 'SELECT COUNT(*) as total FROM vote_records WHERE vote_id = ?';
+    const [countResult] = await pool.query(countSql, [voteId]);
+    const total = countResult[0].total;
+
+    const offset = (page - 1) * pageSize;
+    const sql = `SELECT * FROM vote_records WHERE vote_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const [rows] = await pool.query(sql, [voteId, parseInt(pageSize), offset]);
+
+    return { list: rows, total };
+  }
 }
 
 module.exports = Vote;

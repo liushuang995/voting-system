@@ -82,6 +82,22 @@ exports.detail = async (req, res) => {
   }
 };
 
+// 获取投票记录明细
+exports.records = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page: pageNum, pageSize } = req.query;
+    const result = await Vote.getRecords(id, {
+      page: parseInt(pageNum) || 1,
+      pageSize: parseInt(pageSize) || 10
+    });
+    page(res, result);
+  } catch (err) {
+    console.error(err);
+    error(res, '获取投票记录失败');
+  }
+};
+
 // 导出投票记录
 exports.exportRecords = async (req, res) => {
   try {
