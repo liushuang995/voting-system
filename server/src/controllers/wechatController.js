@@ -4,6 +4,8 @@ const WechatService = require('../services/wechatService');
 const AdminWhitelist = require('../models/AdminWhitelist');
 const { success, error } = require('../utils/response');
 const { generateToken } = require('../middlewares/auth');
+const Vote = require('../models/Vote');
+const VoteRecord = require('../models/VoteRecord');
 
 // 微信扫码登录
 exports.wechatLogin = async (req, res) => {
@@ -88,5 +90,110 @@ exports.getJssdkConfig = async (req, res) => {
   } catch (err) {
     console.error(err);
     error(res, '获取JS-SDK配置失败');
+  }
+};
+
+// 提交投票
+exports.submitVote = async (req, res) => {
+  try {
+    const { share_url, options } = req.body;
+
+    if (!share_url || !options || options.length === 0) {
+      return error(res, '参数错误');
+    }
+
+    const vote = await Vote.findByShareUrl(share_url);
+    if (!vote) {
+      return error(res, '投票不存在');
+    }
+
+    if (vote.status !== 'active') {
+      return error(res, '投票已截止');
+    }
+
+    if (vote.end_time && new Date(vote.end_time) < new Date()) {
+      return error(res, '投票已截止');
+    }
+
+    // 获取用户信息（如果已登录）
+    const unionid = req.user?.unionid || 'anonymous';
+    const nickname = req.user?.nickname || '微信用户';
+    const avatar = req.user?.avatar || '';
+
+    // 检查投票限制
+    if (vote.max_votes_per_user > 0) {
+      const voteCount = await VoteRecord.countByUnionid(vote.id, unionid);
+      if (voteCount >= vote.max_votes_per_user) {
+        return error(res, `您已投过票，本次投票次数已用完`);
+      }
+    }
+
+    await VoteRecord.create({
+      vote_id: vote.id,
+      unionid,
+      nickname,
+      avatar,
+      options
+    });
+
+    success(res);
+  } catch (err) {
+    console.error(err);
+    error(res, '投票失败');
+  }
+};
+
+// 获取投票状态
+exports.getVoteStatus = async (req, res) => {
+  try {
+    const { voteId } = req.params;
+    const unionid = req.user?.unionid;
+
+    const vote = await Vote.findById(voteId);
+    if (!vote) {
+      return error(res, '投票不存在');
+    }
+
+    let remaining = -1;
+    if (unionid && vote.max_votes_per_user > 0) {
+      const count = await VoteRecord.countByUnionid(voteId, unionid);
+      remaining = Math.max(0, vote.max_votes_per_user - count);
+    }
+
+    success(res, {
+      canVote: remaining !== 0,
+      remaining
+    });
+  } catch (err) {
+    console.error(err);
+    error(res, '获取状态失败');
+  }
+};
+
+// 获取公开投票详情
+exports.getPublicVote = async (req, res) => {
+  try {
+    const { shareUrl } = req.params;
+    const vote = await Vote.findByShareUrl(shareUrl);
+    if (!vote) {
+      return error(res, '投票不存在');
+    }
+    success(res, vote);
+  } catch (err) {
+    console.error(err);
+    error(res, '获取投票失败');
+  }
+};
+
+// 获取投票记录
+exports.getVoteRecords = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, pageSize = 20 } = req.query;
+    const result = await VoteRecord.findByVoteId(id, page, pageSize);
+    res.json({ code: 0, data: result });
+  } catch (err) {
+    console.error(err);
+    error(res, '获取投票记录失败');
   }
 };
