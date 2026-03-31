@@ -1,13 +1,18 @@
 const QRCode = require('qrcode');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 class QrcodeService {
-  static async generate(voteId, shareUrl) {
-    // 确保上传目录存在
+  static async generate(shareUrl) {
     const uploadDir = path.join(__dirname, '../../uploads/qrcodes');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+
+    // Ensure directory exists (async)
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+    } catch (err) {
+      if (err.code !== 'EEXIST') {
+        throw err;
+      }
     }
 
     const fileName = `${shareUrl}.png`;

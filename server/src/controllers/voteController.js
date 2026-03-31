@@ -39,7 +39,7 @@ exports.create = async (req, res) => {
     });
 
     // 生成二维码
-    const qrcode = await QrcodeService.generate(id, share_url);
+    const qrcode = await QrcodeService.generate(share_url);
     await Vote.update(id, { qrcode });
 
     success(res, { id, share_url, qrcode });
