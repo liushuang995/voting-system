@@ -91,7 +91,7 @@ function VoteEdit() {
       </Space>
       <Card loading={initLoading}>
         <Form form={form} onFinish={onFinish} layout="vertical">
-          <Form.Item name="title" label="投票标题" rules={[{ required: true }]}>
+          <Form.Item name="title" label="投票标题" rules={[{ required: true, message: '请输入标题' }]}>
             <Input maxLength={100} />
           </Form.Item>
           <Form.Item name="description" label="投票说明">
@@ -129,7 +129,13 @@ function VoteEdit() {
             </Select>
           </Form.Item>
           <Form.Item name="end_time" label="截止时间">
-            <DatePicker showTime />
+            <DatePicker showTime placeholder="选择截止时间" />
+          </Form.Item>
+          <Form.Item name="share_title" label="分享标题">
+            <Input placeholder="自定义分享标题（默认使用投票标题）" />
+          </Form.Item>
+          <Form.Item name="share_desc" label="分享描述">
+            <Input placeholder="自定义分享描述" maxLength={200} />
           </Form.Item>
           <Form.Item>
             <Space>
