@@ -4,18 +4,37 @@ const VoteRecord = require('../models/VoteRecord');
 
 class ExportService {
   static async exportVoteRecords(voteId, res) {
-    const vote = await Vote.findById(voteId);
-    if (!vote) {
+    let vote;
+    let list = [];
+
+    try {
+      vote = await Vote.findById(voteId);
+      if (!vote) {
+        throw new Error('投票不存在');
+      }
+    } catch (err) {
+      console.error('ExportService: Failed to find vote:', err);
       throw new Error('投票不存在');
     }
 
-    const { list } = await VoteRecord.findByVoteId(voteId, 1, 10000);
-    const options = JSON.parse(vote.options || '[]');
+    try {
+      const result = await VoteRecord.findByVoteId(voteId, 1, 10000);
+      list = result.list;
+    } catch (err) {
+      console.error('ExportService: Failed to find records:', err);
+      list = [];
+    }
+
+    let options = [];
+    try {
+      options = JSON.parse(vote.options || '[]');
+    } catch (e) {
+      options = [];
+    }
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('投票明细');
 
-    // 设置列宽
     sheet.columns = [
       { header: '序号', key: 'index', width: 10 },
       { header: '微信昵称', key: 'nickname', width: 30 },
@@ -23,13 +42,16 @@ class ExportService {
       { header: '选择的选项', key: 'selected_options', width: 50 }
     ];
 
-    // 添加表头样式
     sheet.getRow(1).font = { bold: true };
 
-    // 数据行
     list.forEach((record, idx) => {
-      const selectedOptions = JSON.parse(record.options || '[]');
-      const selectedLabels = selectedOptions.map(i => options[i] || `选项${i + 1}`).join(', ');
+      let selectedLabels = '未知';
+      try {
+        const selectedOptions = JSON.parse(record.options || '[]');
+        selectedLabels = selectedOptions.map(i => options[i] || `选项${i + 1}`).join(', ');
+      } catch (e) {
+        // ignore parse errors
+      }
 
       sheet.addRow({
         index: idx + 1,
@@ -39,7 +61,6 @@ class ExportService {
       });
     });
 
-    // 设置响应头
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename=vote-${voteId}-records.xlsx`);
 
