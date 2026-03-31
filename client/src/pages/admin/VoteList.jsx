@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Space, Input, Select, Popconfirm, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { PlusOutlined, EditOutlined, DeleteOutlined, BarChartOutlined } from '@ant-design/icons';
@@ -14,24 +14,31 @@ function VoteList() {
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    loadVotes();
-  }, [pagination.current, status]);
-
-  const loadVotes = async () => {
+  const loadVotes = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/votes', { params: { status, page: pagination.current, pageSize: pagination.pageSize, search } });
+      const res = await api.get('/votes', {
+        params: {
+          status,
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+          search
+        }
+      });
       if (res.code === 0) {
         setVotes(res.data.list);
-        setPagination({ ...pagination, total: res.data.total });
+        setPagination(prev => ({ ...prev, total: res.data.total }));
       }
     } catch (err) {
       message.error('获取投票列表失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, [status, pagination.current, pagination.pageSize, search]);
+
+  useEffect(() => {
+    loadVotes();
+  }, [loadVotes]);
 
   const handleDelete = async (id) => {
     try {
@@ -43,6 +50,14 @@ function VoteList() {
     } catch (err) {
       message.error('删除失败');
     }
+  };
+
+  const handleTableChange = (newPagination) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
   };
 
   const columns = [
@@ -84,15 +99,32 @@ function VoteList() {
         </Button>
       </div>
       <Space style={{ marginBottom: 16 }}>
-        <Input.Search placeholder="搜索投票标题" onSearch={loadVotes} style={{ width: 200 }} />
-        <Select value={status} onChange={setStatus} style={{ width: 120 }}>
+        <Input.Search
+          placeholder="搜索投票标题"
+          onSearch={(value) => {
+            setSearch(value);
+            setPagination(prev => ({ ...prev, current: 1 }));
+          }}
+          style={{ width: 200 }}
+        />
+        <Select value={status} onChange={(value) => {
+          setStatus(value);
+          setPagination(prev => ({ ...prev, current: 1 }));
+        }} style={{ width: 120 }}>
           <Option value="all">全部</Option>
           <Option value="active">进行中</Option>
           <Option value="closed">已截止</Option>
         </Select>
         <Button onClick={loadVotes}>刷新</Button>
       </Space>
-      <Table columns={columns} dataSource={votes} rowKey="id" loading={loading} pagination={pagination} onChange={setPagination} />
+      <Table
+        columns={columns}
+        dataSource={votes}
+        rowKey="id"
+        loading={loading}
+        pagination={{ ...pagination, current: pagination.current }}
+        onChange={handleTableChange}
+      />
     </div>
   );
 }
