@@ -22,6 +22,9 @@ app.use('/api/admin', adminRoutes);
 const voteRoutes = require('./routes/votes');
 app.use('/api/votes', voteRoutes);
 
+const wechatRoutes = require('./routes/wechat');
+app.use('/api/wechat', wechatRoutes);
+
 // 错误处理
 app.use((err, req, res, next) => {
   console.error(err.stack);
