@@ -160,10 +160,14 @@ function VotePage() {
   }
 
   let options = [];
-  try {
-    options = JSON.parse(vote.options || '[]');
-  } catch (e) {
-    options = [];
+  if (Array.isArray(vote.options)) {
+    options = vote.options;
+  } else if (typeof vote.options === 'string') {
+    try {
+      options = JSON.parse(vote.options);
+    } catch (e) {
+      options = [];
+    }
   }
 
   return (
