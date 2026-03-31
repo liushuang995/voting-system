@@ -3,6 +3,7 @@ import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import VoteList from './pages/admin/VoteList';
 import VoteCreate from './pages/admin/VoteCreate';
+import VoteResults from './pages/admin/VoteResults';
 import AdminLayout from './components/Layout';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="votes" element={<VoteList />} />
         <Route path="votes/create" element={<VoteCreate />} />
+        <Route path="votes/:id/results" element={<VoteResults />} />
       </Route>
       <Route path="/" element={<Navigate to="/admin" replace />} />
     </Routes>
