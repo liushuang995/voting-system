@@ -5,6 +5,7 @@ import VoteList from './pages/admin/VoteList';
 import VoteCreate from './pages/admin/VoteCreate';
 import VoteResults from './pages/admin/VoteResults';
 import VoteEdit from './pages/admin/VoteEdit';
+import Whitelist from './pages/admin/Whitelist';
 import AdminLayout from './components/Layout';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="votes/create" element={<VoteCreate />} />
         <Route path="votes/:id/results" element={<VoteResults />} />
         <Route path="votes/:id/edit" element={<VoteEdit />} />
+        <Route path="whitelist" element={<Whitelist />} />
       </Route>
       <Route path="/" element={<Navigate to="/admin" replace />} />
     </Routes>
