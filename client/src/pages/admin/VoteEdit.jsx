@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Select, DatePicker, Button, Card, Space, message } from 'antd';
-import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import api from '../../api';
 import moment from 'moment';
@@ -11,7 +11,6 @@ function VoteEdit() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
-  const [vote, setVote] = useState(null);
   const [options, setOptions] = useState(['', '']);
 
   useEffect(() => {
@@ -23,7 +22,6 @@ function VoteEdit() {
     try {
       const res = await api.get(`/votes/${id}`);
       if (res?.code === 0) {
-        setVote(res.data);
         const rawOpts = res.data.options;
         let opts;
         if (Array.isArray(rawOpts)) {
@@ -96,60 +94,72 @@ function VoteEdit() {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/votes')}>返回</Button>
-        <h2>编辑投票</h2>
+        <h2 style={{ margin: 0 }}>编辑投票</h2>
       </Space>
       <Card loading={initLoading}>
         <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item name="title" label="投票标题" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input maxLength={100} />
+            <Input maxLength={100} size="large" />
           </Form.Item>
           <Form.Item name="description" label="投票说明">
-            <Input.TextArea maxLength={500} rows={3} />
+            <Input.TextArea maxLength={500} rows={3} showCount />
           </Form.Item>
           <Form.Item name="type" label="投票类型">
-            <Select>
+            <Select size="large">
               <Select.Option value="single">单选</Select.Option>
               <Select.Option value="multiple">多选</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item label="投票选项">
-            <Space direction="vertical">
+            <Space direction="vertical" style={{ width: '100%' }} size={12}>
               {options.map((option, index) => (
-                <Space key={index}>
+                <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                   <Input
                     value={option}
                     onChange={(e) => updateOption(index, e.target.value)}
                     maxLength={50}
-                    style={{ width: 300 }}
+                    style={{ flex: 1, height: 44 }}
                   />
                   {options.length > 2 && (
-                    <Button danger onClick={() => removeOption(index)}>删除</Button>
+                    <Button
+                      danger
+                      onClick={() => removeOption(index)}
+                      style={{ height: 44, minWidth: 44 }}
+                    >
+                      删除
+                    </Button>
                   )}
-                </Space>
+                </div>
               ))}
-              {options.length < 20 && <Button onClick={addOption}>添加选项</Button>}
+              {options.length < 20 && (
+                <Button onClick={addOption} style={{ height: 44 }}>添加选项</Button>
+              )}
             </Space>
           </Form.Item>
           <Form.Item name="max_votes_per_user" label="每人投票次数">
-            <Select>
+            <Select size="large">
               {[1, 2, 3, 5, 0].map(n => (
                 <Select.Option key={n} value={n}>{n === 0 ? '无限' : `${n}次`}</Select.Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item name="end_time" label="截止时间">
-            <DatePicker showTime placeholder="选择截止时间" />
+            <DatePicker showTime placeholder="选择截止时间" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="share_title" label="分享标题">
             <Input placeholder="自定义分享标题（默认使用投票标题）" />
           </Form.Item>
           <Form.Item name="share_desc" label="分享描述">
-            <Input placeholder="自定义分享描述" maxLength={200} />
+            <Input placeholder="自定义分享描述" maxLength={200} showCount />
           </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>保存</Button>
-              <Button onClick={() => navigate('/admin/votes')}>取消</Button>
+          <Form.Item style={{ marginTop: 24 }}>
+            <Space wrap size={[12, 12]}>
+              <Button type="primary" htmlType="submit" loading={loading} size="large" style={{ minWidth: 100 }}>
+                保存
+              </Button>
+              <Button size="large" onClick={() => navigate('/admin/votes')} style={{ minWidth: 100 }}>
+                取消
+              </Button>
             </Space>
           </Form.Item>
         </Form>

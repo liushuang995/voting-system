@@ -81,19 +81,18 @@ function VoteResults() {
     {
       title: '用户名称',
       dataIndex: 'nickname',
-      width: 150,
+      width: 120,
       render: (nickname) => nickname || '未知'
     },
     {
       title: '投票时间',
       dataIndex: 'created_at',
-      width: 180,
+      width: 160,
       render: (t) => t ? new Date(t).toLocaleString() : '未知'
     },
     {
       title: '选择选项',
       dataIndex: 'options',
-      width: 300,
       render: (opts) => {
         let parsed = [];
         if (Array.isArray(opts)) {
@@ -116,31 +115,59 @@ function VoteResults() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
+      <Space wrap style={{ marginBottom: 16, gap: 8 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/votes')}>返回</Button>
-        <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/votes/${id}/export`)}>导出Excel</Button>
-        <h2 style={{ margin: 0 }}>{vote.title}</h2>
+        <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/votes/${id}/export`)}>导出</Button>
       </Space>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card title="投票人数">{total}</Card>
+      <h2 style={{ margin: '16px 0', fontSize: 20 }}>{vote.title}</h2>
+
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={8}>
+          <Card title="投票人数" size="small">
+            <span style={{ fontSize: 24, fontWeight: 'bold', color: '#2563EB' }}>{total}</span>
+          </Card>
         </Col>
-        <Col span={8}>
-          <Card title="投票类型">{vote.type === 'single' ? '单选' : '多选'}</Card>
+        <Col xs={24} sm={8}>
+          <Card title="投票类型" size="small">
+            <span style={{ fontSize: 16 }}>{vote.type === 'single' ? '单选' : '多选'}</span>
+          </Card>
         </Col>
-        <Col span={8}>
-          <Card title="状态">{vote.status === 'active' ? '进行中' : '已截止'}</Card>
+        <Col xs={24} sm={8}>
+          <Card title="状态" size="small">
+            <span style={{
+              fontSize: 16,
+              color: vote.status === 'active' ? '#52c41a' : '#ff4d4f'
+            }}>
+              {vote.status === 'active' ? '进行中' : '已截止'}
+            </span>
+          </Card>
         </Col>
       </Row>
 
-      <Card title="投票结果" style={{ marginBottom: 24 }}>
-        <Row gutter={[16, 16]}>
+      <Card title="投票结果" style={{ marginBottom: 16 }}>
+        <Row gutter={[12, 12]}>
           {Object.entries(results).map(([idx, { label, count, percentage }]) => (
-            <Col span={12} key={idx}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: 100 }}>{label}</span>
-                <Progress percent={percentage} format={() => `${count}票`} style={{ flex: 1 }} />
+            <Col xs={24} sm={12} key={idx}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 0'
+              }}>
+                <span style={{
+                  minWidth: 80,
+                  maxWidth: 120,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>{label}</span>
+                <Progress
+                  percent={percentage}
+                  format={() => `${count}票`}
+                  style={{ flex: 1 }}
+                  strokeColor="#2563EB"
+                />
               </div>
             </Col>
           ))}
@@ -148,7 +175,14 @@ function VoteResults() {
       </Card>
 
       <Card title="投票明细">
-        <Table columns={columns} dataSource={records} rowKey="id" pagination={{ pageSize: 20 }} />
+        <Table
+          columns={columns}
+          dataSource={records}
+          rowKey="id"
+          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `共 ${total} 条` }}
+          scroll={{ x: 500 }}
+          size="small"
+        />
       </Card>
     </div>
   );

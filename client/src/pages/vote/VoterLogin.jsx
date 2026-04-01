@@ -33,8 +33,19 @@ function VoterLogin() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
-      <Card title="用户登录" style={{ width: 360 }}>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#f5f7fa',
+      padding: '16px'
+    }}>
+      <Card
+        title="用户登录"
+        style={{ width: '100%', maxWidth: 400 }}
+        styles={{ body: { padding: '20px' } }}
+      >
         {shareUrl && (
           <p style={{ marginBottom: 16, color: '#666' }}>即将跳转至投票页面</p>
         )}
@@ -44,17 +55,32 @@ function VoterLogin() {
             label="账号"
             rules={[{ required: true, message: '请输入账号' }]}
           >
-            <Input placeholder="请输入账号" />
+            <Input
+              placeholder="请输入账号"
+              size="large"
+              style={{ height: 48 }}
+            />
           </Form.Item>
           <Form.Item
             name="password"
             label="密码"
             rules={[{ required: true, message: '请输入密码' }]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input.Password
+              placeholder="请输入密码"
+              size="large"
+              style={{ height: 48 }}
+            />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
+          <Form.Item style={{ marginTop: 24 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              block
+              size="large"
+              style={{ height: 52 }}
+            >
               登录
             </Button>
           </Form.Item>

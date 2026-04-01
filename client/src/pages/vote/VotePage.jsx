@@ -20,7 +20,6 @@ function VotePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('voter_token'));
 
   useEffect(() => {
-    // 非微信环境先加载投票
     loadVote();
   }, [shareUrl]);
 
@@ -88,7 +87,13 @@ function VotePage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '50vh',
+        padding: '24px'
+      }}>
         <Spin size="large" />
       </div>
     );
@@ -97,8 +102,19 @@ function VotePage() {
   // 非微信环境且未登录，显示登录表单
   if (!isWeChat() && !isLoggedIn) {
     return (
-      <div style={{ maxWidth: 400, margin: '50px auto', padding: '0 16px' }}>
-        <Card title="请先登录">
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f5f7fa',
+        padding: '16px'
+      }}>
+        <Card
+          title="请先登录"
+          style={{ width: '100%', maxWidth: 400 }}
+          styles={{ body: { padding: '20px' } }}
+        >
           <p style={{ marginBottom: 16, color: '#666' }}>使用白名单账号登录后可参与投票</p>
           <Form onFinish={handleVoterLogin} layout="vertical">
             <Form.Item
@@ -106,17 +122,32 @@ function VotePage() {
               label="账号"
               rules={[{ required: true, message: '请输入账号' }]}
             >
-              <Input placeholder="请输入账号" />
+              <Input
+                placeholder="请输入账号"
+                size="large"
+                style={{ height: 48 }}
+              />
             </Form.Item>
             <Form.Item
               name="password"
               label="密码"
               rules={[{ required: true, message: '请输入密码' }]}
             >
-              <Input.Password placeholder="请输入密码" />
+              <Input.Password
+                placeholder="请输入密码"
+                size="large"
+                style={{ height: 48 }}
+              />
             </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loginLoading} block>
+            <Form.Item style={{ marginTop: 24 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loginLoading}
+                block
+                size="large"
+                style={{ height: 52 }}
+              >
                 登录
               </Button>
             </Form.Item>
@@ -171,32 +202,88 @@ function VotePage() {
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '50px auto', padding: '0 16px' }}>
-      <Card title={<h2 style={{ margin: 0 }}>{vote.title}</h2>}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#f5f7fa',
+      padding: '16px'
+    }}>
+      <Card
+        title={<h2 style={{ margin: 0, fontSize: 20 }}>{vote.title}</h2>}
+        style={{ width: '100%', maxWidth: 600, margin: '0 auto' }}
+        styles={{ body: { padding: '20px' } }}
+      >
         {vote.description && (
-          <p style={{ color: '#666', marginBottom: 16 }}>{vote.description}</p>
+          <p style={{ color: '#666', marginBottom: 16, lineHeight: 1.6 }}>{vote.description}</p>
         )}
 
-        <div style={{ marginBottom: 16 }}>
-          <p>投票类型：{vote.type === 'single' ? '单选' : '多选'}</p>
+        <div style={{
+          background: '#f8fafc',
+          padding: '12px 16px',
+          borderRadius: 8,
+          marginBottom: 20
+        }}>
+          <span style={{ color: '#64748b', fontSize: 14 }}>
+            投票类型：
+            <span style={{ color: '#2563EB', fontWeight: 600 }}>
+              {vote.type === 'single' ? '单选' : '多选'}
+            </span>
+          </span>
         </div>
 
         <div style={{ marginBottom: 24 }}>
           {options.length === 0 ? (
-            <p style={{ color: '#999' }}>暂无可投票项</p>
+            <p style={{ color: '#999', textAlign: 'center', padding: '24px 0' }}>暂无可投票项</p>
           ) : vote.type === 'single' ? (
-            <Radio.Group value={selected[0]} onChange={(e) => setSelected([e.target.value])}>
-              <Space direction="vertical">
+            <Radio.Group
+              value={selected[0]}
+              onChange={(e) => setSelected([e.target.value])}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }} size={12}>
                 {options.map((opt, idx) => (
-                  <Radio key={idx} value={idx} style={{ fontSize: 16 }}>{opt}</Radio>
+                  <Radio.Button
+                    key={idx}
+                    value={idx}
+                    style={{
+                      fontSize: 16,
+                      height: 52,
+                      lineHeight: '50px',
+                      textAlign: 'center',
+                      width: '100%',
+                      borderRadius: 12,
+                      border: '2px solid #e2e8f0',
+                    }}
+                  >
+                    {opt}
+                  </Radio.Button>
                 ))}
               </Space>
             </Radio.Group>
           ) : (
-            <Checkbox.Group value={selected} onChange={(values) => setSelected(values)}>
-              <Space direction="vertical">
+            <Checkbox.Group
+              value={selected}
+              onChange={(values) => setSelected(values)}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }} size={12}>
                 {options.map((opt, idx) => (
-                  <Checkbox key={idx} value={idx} style={{ fontSize: 16 }}>{opt}</Checkbox>
+                  <Checkbox
+                    key={idx}
+                    value={idx}
+                    style={{
+                      fontSize: 16,
+                      height: 52,
+                      lineHeight: '50px',
+                      paddingLeft: 16,
+                      background: '#fff',
+                      border: '2px solid #e2e8f0',
+                      borderRadius: 12,
+                      width: '100%',
+                      marginLeft: 0
+                    }}
+                  >
+                    {opt}
+                  </Checkbox>
                 ))}
               </Space>
             </Checkbox.Group>
@@ -209,6 +296,12 @@ function VotePage() {
           block
           loading={submitting}
           onClick={handleSubmit}
+          style={{
+            height: 52,
+            fontSize: 17,
+            fontWeight: 600,
+            borderRadius: 12
+          }}
         >
           提交投票
         </Button>
